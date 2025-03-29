@@ -18,18 +18,23 @@ jobs:
       - name: Install Dependencies
         run: npm ci --force
 
+      - name: Install Java (required by Dependency Check)
+        run: sudo apt-get install -y default-jdk
+
       - name: Download OWASP Dependency Check
         run: |
-          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip
-          unzip dependency-check-7.2.0-release.zip
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip -O dependency-check.zip
+          unzip dependency-check.zip -d dependency-check
+
+      - name: Make Dependency Check Script Executable
+        run: chmod +x dependency-check/bin/dependency-check.sh
 
       - name: Run OWASP Dependency Check
-        run: |
-          dependency-check/bin/dependency-check.sh --project "bitcoin" --scan . -f ALL -o reports
+        run: dependency-check/bin/dependency-check.sh --project "bitcoin" --scan . -f ALL -o ./ODC-report
 
       - name: Archive production artifacts
         uses: actions/upload-artifact@v4
         with:
           name: sast-report
           path: |
-            reports
+            ./ODC-report
