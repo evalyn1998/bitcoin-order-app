@@ -25,6 +25,7 @@ jobs:
         run: |
           wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip -O dependency-check.zip
           unzip dependency-check.zip -d dependency-check
+          ls -l dependency-check/bin
 
       - name: Make Dependency Check Script Executable
         run: chmod +x dependency-check/bin/dependency-check.sh
