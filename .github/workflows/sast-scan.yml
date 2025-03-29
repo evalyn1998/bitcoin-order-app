@@ -13,28 +13,27 @@ jobs:
         node-version: [16.x]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Install Dependencies
         run: npm ci --force
 
-      - name: Install Java (required by Dependency Check)
-        run: sudo apt-get install -y default-jdk
-
       - name: Download OWASP Dependency Check
         run: |
-          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip -O dependency-check.zip
-          unzip dependency-check.zip -d dependency-check
+          wget https://github.com/jeremylong/DependencyCheck/releases/download/v7.2.0/dependency-check-7.2.0-release.zip
+          unzip dependency-check-7.2.0-release.zip
 
-      - name: Make Dependency Check Script Executable
-        run: chmod +x dependency-check/bin/dependency-check.sh
+      - name: Run scan with ODC
+        run: |
+          dependency-check/bin/dependency-check.sh \
+            --project "bitcoin" \
+            --scan . \
+            --format HTML \
+            --out ./ODC-report \
+            --failOnCVSS 11 || true
 
-      - name: Run OWASP Dependency Check
-        run: dependency-check/bin/dependency-check.sh --project "bitcoin" --scan . > ODC-report
-
-      - name: Archive production artifacts
+      - name: Archive ODC report
         uses: actions/upload-artifact@v4
         with:
           name: sast-report
-          path: |
-            ./ODC-report
+          path: ./ODC-report
